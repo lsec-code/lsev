@@ -47,12 +47,24 @@ add-apt-repository -y ppa:ondrej/php
 apt update -y
 
 # Install PHP 8.2 (Compatible with most Laravel v10/v11 apps) and Extensions
+# Install PHP 8.3 (Compatible with most Laravel v10/v11 apps) and Extensions
 # Adjust version if needed (user didn't specify, assuming 8.2 or 8.3)
-PHP_VER="8.2"
+PHP_VER="8.3"
 apt install -y nginx mariadb-server php${PHP_VER} php${PHP_VER}-fpm php${PHP_VER}-mysql \
 php${PHP_VER}-mbstring php${PHP_VER}-xml php${PHP_VER}-bcmath php${PHP_VER}-curl \
 php${PHP_VER}-gd php${PHP_VER}-zip php${PHP_VER}-intl php${PHP_VER}-tokenizer \
 phpmyadmin
+
+# Configure PHP Limits (Upload Size, Memory, Time)
+echo -e "${YELLOW}[+] Configuring PHP Limits (512M)...${NC}"
+PHP_INI="/etc/php/${PHP_VER}/fpm/php.ini"
+if [ -f "$PHP_INI" ]; then
+    sed -i "s/upload_max_filesize = .*/upload_max_filesize = 512M/" $PHP_INI
+    sed -i "s/post_max_size = .*/post_max_size = 512M/" $PHP_INI
+    sed -i "s/memory_limit = .*/memory_limit = 512M/" $PHP_INI
+    sed -i "s/max_execution_time = .*/max_execution_time = 300/" $PHP_INI
+    sed -i "s/max_input_time = .*/max_input_time = 300/" $PHP_INI
+fi
 
 # 3. Database Setup
 echo -e "${YELLOW}[+] Configuring MariaDB...${NC}"
@@ -146,6 +158,8 @@ server {
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
+    
+    client_max_body_size 512M;
 
     index index.php;
 
