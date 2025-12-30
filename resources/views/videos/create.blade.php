@@ -145,7 +145,7 @@
                 uploadSpeed: '0 MB/s',
                 fileStatus: 'Preparing...',
                 xhr: null,
-                chunkSize: 2 * 1024 * 1024, // 2MB
+                chunkSize: 5 * 1024 * 1024, // 5MB (Safe Balance)
                 totalChunks: 0,
                 currentChunk: 0,
                 file: null,

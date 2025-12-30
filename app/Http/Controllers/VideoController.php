@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Video;
 
 class VideoController extends Controller
 {
@@ -241,6 +242,7 @@ class VideoController extends Controller
                     $title = pathinfo($originalName, PATHINFO_FILENAME);
                     $fileSize = filesize($finalPath);
 
+                try {
                     Video::create([
                         'user_id' => $userId,
                         'folder_id' => $folderId,
@@ -255,9 +257,21 @@ class VideoController extends Controller
                     return response()->json(['success' => true]);
 
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('FINALIZATION_ERROR: ' . $e->getMessage());
-                    return response()->json(['error' => 'Gagal menyelesaikan upload: ' . $e->getMessage()], 500);
+                    // ROLLBACK: Delete file if DB insert fails
+                    if (file_exists($finalPath)) {
+                        @unlink($finalPath);
+                    }
+                    
+                    $errorMsg = 'DB_INSERT_ERROR: ' . $e->getMessage();
+                    \Illuminate\Support\Facades\Log::error($errorMsg);
+                    
+                    return response()->json(['error' => 'Database Error: ' . $e->getMessage()], 500);
                 }
+
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('FINALIZATION_ERROR: ' . $e->getMessage());
+                return response()->json(['error' => 'Gagal File: ' . $e->getMessage()], 500);
+            }
             }
 
             return response()->json(['success' => true, 'chunk' => $chunkIndex]);
