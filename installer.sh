@@ -97,6 +97,18 @@ cd $target_dir
 cp .env.example .env
 
 # Update .env
+# 1. Change Connection to mysql
+sed -i "s/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/g" .env
+
+# 2. Uncomment and set Database Config
+# Handle commented out defaults in .env.example
+sed -i "s/# DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/g" .env
+sed -i "s/# DB_PORT=3306/DB_PORT=3306/g" .env
+sed -i "s/# DB_DATABASE=laravel/DB_DATABASE=$DB_NAME/g" .env
+sed -i "s/# DB_USERNAME=root/DB_USERNAME=root/g" .env
+sed -i "s/# DB_PASSWORD=/DB_PASSWORD=$DB_ROOT_PASS/g" .env
+
+# Handle if already uncommented (standard replace)
 sed -i "s/APP_URL=http:\/\/localhost/APP_URL=http:\/\/$APP_URL:8000/g" .env
 sed -i "s/DB_DATABASE=laravel/DB_DATABASE=$DB_NAME/g" .env
 sed -i "s/DB_PASSWORD=/DB_PASSWORD=$DB_ROOT_PASS/g" .env
