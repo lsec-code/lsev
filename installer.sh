@@ -8,11 +8,29 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+PURPLE='\033[0;35m'
+BOLD='\033[1m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}=========================================${NC}"
-echo -e "${GREEN}   LSEV AUTOMATED INSTALLER (UBUNTU)     ${NC}"
-echo -e "${GREEN}=========================================${NC}"
+clear
+echo -e "${CYAN}"
+cat << "EOF"
+       .--.     
+      |o_o |    ${PURPLE}██╗     ██╗███╗   ██╗██╗   ██╗██╗  ██╗███████╗███████╗██╗${CYAN}
+      |:_/ |    ${PURPLE}██║     ██║████╗  ██║██║   ██║╚██╗██╔╝██╔════╝██╔════╝██║${CYAN}
+     //   \ \   ${PURPLE}██║     ██║██╔██╗ ██║██║   ██║ ╚███╔╝ ███████╗█████╗  ██║${CYAN}
+    (|     | )  ${PURPLE}██║     ██║██║╚██╗██║██║   ██║ ██╔██╗ ╚════██║██╔══╝  ██║${CYAN}
+   /'\_   _/`\  ${PURPLE}███████╗██║██║ ╚████║╚██████╔╝██╔╝ ██╗███████║███████╗███████╗${CYAN}
+   \___)=(___/  ${PURPLE}╚══════╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝${CYAN}
+EOF
+echo -e "${NC}"
+echo -e "${BOLD}${BLUE}   >>> PREMIUM LSEV SERVER INSTALLER | PHP 8.3 | OPTIMIZED <<<   ${NC}"
+echo -e "${BLUE}=========================================================================${NC}"
+echo -e "${YELLOW}   Created by: Antigravity & Google DeepMind${NC}"
+echo -e "${BLUE}=========================================================================${NC}"
+echo ""
 
 # Check logic for root
 if [[ $EUID -ne 0 ]]; then
