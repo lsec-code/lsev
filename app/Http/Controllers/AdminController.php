@@ -1568,4 +1568,99 @@ class AdminController extends Controller
             ], 200); // Return 200 so JS can parse the error message easily
         }
     }
+    public function getServerStats()
+    {
+        try {
+            // 1. RAM Usage
+            $memTotal = 0;
+            $memFree = 0;
+            $memAvailable = 0;
+
+            if (file_exists('/proc/meminfo')) {
+                $memInfo = file_get_contents('/proc/meminfo');
+                foreach (explode("\n", $memInfo) as $line) {
+                    if (strpos($line, 'MemTotal:') === 0) {
+                        $memTotal = (int) filter_var($line, FILTER_SANITIZE_NUMBER_INT) * 1024;
+                    }
+                    if (strpos($line, 'MemFree:') === 0) {
+                        $memFree = (int) filter_var($line, FILTER_SANITIZE_NUMBER_INT) * 1024;
+                    }
+                    if (strpos($line, 'MemAvailable:') === 0) {
+                        $memAvailable = (int) filter_var($line, FILTER_SANITIZE_NUMBER_INT) * 1024;
+                    }
+                }
+            }
+            
+            // Fallback for non-Linux or failed read
+            if ($memTotal == 0) $memTotal = 1; 
+
+            // Calculate Used
+            // Ideally use MemAvailable if present, else MemFree
+            $free = $memAvailable > 0 ? $memAvailable : $memFree;
+            $used = $memTotal - $free;
+            $ramPercent = round(($used / $memTotal) * 100, 1);
+
+            // Format bytes
+            $formatBytes = function($bytes, $precision = 2) { 
+                $units = ['B', 'KB', 'MB', 'GB', 'TB']; 
+                $bytes = max($bytes, 0); 
+                $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+                $pow = min($pow, count($units) - 1); 
+                $bytes /= pow(1024, $pow); 
+                return round($bytes, $precision) . ' ' . $units[$pow]; 
+            };
+
+            // 2. CPU Load & Cores & Model
+            $load = [0, 0, 0];
+            $cores = 1;
+            $model = 'Unknown';
+
+            if (file_exists('/proc/loadavg')) {
+                $load = explode(' ', file_get_contents('/proc/loadavg'));
+                $load = array_slice($load, 0, 3);
+            }
+
+            if (file_exists('/proc/cpuinfo')) {
+                $cpuInfo = file_get_contents('/proc/cpuinfo');
+                $cores = substr_count($cpuInfo, 'processor');
+                
+                preg_match('/model name\s+:\s+(.*)/i', $cpuInfo, $matches);
+                if (isset($matches[1])) {
+                    $model = trim($matches[1]);
+                }
+            } else {
+                // Windows fallback (approx)
+                if (function_exists('sys_getloadavg')) {
+                   $load = sys_getloadavg();
+                }
+            }
+
+            // 3. Uptime
+            $uptimeText = 'Unknown';
+            if (file_exists('/proc/uptime')) {
+                $uptimeSeconds = (int) explode(' ', file_get_contents('/proc/uptime'))[0];
+                $uptimeText = gmdate("H:i:s", $uptimeSeconds % 86400);
+                $days = floor($uptimeSeconds / 86400);
+                if ($days > 0) $uptimeText = "$days Days, $uptimeText";
+            }
+
+            return response()->json([
+                'success' => true,
+                'ram' => [
+                    'total' => $formatBytes($memTotal),
+                    'used' => $formatBytes($used),
+                    'percent' => $ramPercent
+                ],
+                'cpu' => [
+                    'load' => $load[0] . ' / ' . $load[1] . ' / ' . $load[2],
+                    'cores' => $cores,
+                    'model' => $model
+                ],
+                'uptime' => $uptimeText
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
 }

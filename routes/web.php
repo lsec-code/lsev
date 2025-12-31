@@ -213,6 +213,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         
         // System Health Monitor
         Route::get('/system-health', [\App\Http\Controllers\AdminController::class, 'systemHealth'])->name('system.health');
+        Route::get('/system/stats', [\App\Http\Controllers\AdminController::class, 'getServerStats'])->name('system.stats');
         
         // Backup & Restore
         Route::get('/backup', [\App\Http\Controllers\AdminController::class, 'backup'])->name('backup');

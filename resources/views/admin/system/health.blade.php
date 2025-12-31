@@ -48,7 +48,61 @@
                 </div>
             </div>
 
-            <!-- Resource Usage -->
+            <!-- Live Server Resources (Realtime) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- RAM Usage -->
+                 <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-6 relative overflow-hidden">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-memory text-yellow-500 text-xl"></i>
+                        <h3 class="text-white font-bold">Server RAM (Live)</h3>
+                    </div>
+                    
+                    <div class="mb-4">
+                         <div class="flex justify-between items-end mb-2">
+                            <span class="text-3xl font-bold text-white" id="ram-percent">0%</span>
+                            <span class="text-xs text-gray-400" id="ram-details">0 GB / 0 GB</span>
+                        </div>
+                        <div class="w-full bg-[#111] rounded-full h-2">
+                            <div id="ram-bar" class="bg-yellow-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CPU Usage -->
+                <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-microchip text-blue-500 text-xl"></i>
+                        <h3 class="text-white font-bold">CPU Load</h3>
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <div class="text-2xl font-bold text-white tracking-wider" id="cpu-load">0.00 / 0.00 / 0.00</div>
+                        <div class="text-xs text-gray-500 font-mono">1 min / 5 min / 15 min</div>
+                    </div>
+                    
+                     <div class="mt-4 pt-4 border-t border-[#222] flex justify-between items-center text-sm">
+                        <span class="text-gray-400">Cores</span>
+                        <span class="text-white font-bold" id="cpu-cores">Loading...</span>
+                    </div>
+                    <div class="mt-1 flex justify-between items-center text-xs">
+                         <span class="text-gray-500">Model</span>
+                         <span class="text-gray-400" id="cpu-model">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Uptime -->
+                <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-6">
+                     <div class="flex items-center gap-3 mb-4">
+                        <i class="fa-solid fa-clock text-green-500 text-xl"></i>
+                        <h3 class="text-white font-bold">Server Uptime</h3>
+                    </div>
+                    <div class="flex items-center justify-center h-24">
+                        <div class="text-xl font-bold text-white text-center" id="uptime-text">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Resource Usage -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Memory Usage -->
                 <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-6">
@@ -149,3 +203,35 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fetchStats = () => {
+            fetch("{{ route('admin.system.stats') }}")
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        // Update RAM
+                        document.getElementById('ram-percent').innerText = data.ram.percent + '%';
+                        document.getElementById('ram-details').innerText = data.ram.used + ' / ' + data.ram.total;
+                        document.getElementById('ram-bar').style.width = data.ram.percent + '%';
+
+                        // Update CPU
+                        document.getElementById('cpu-load').innerText = data.cpu.load;
+                        document.getElementById('cpu-cores').innerText = data.cpu.cores + ' Cores';
+                        document.getElementById('cpu-model').innerText = data.cpu.model;
+
+                        // Update Uptime
+                        document.getElementById('uptime-text').innerHTML = data.uptime;
+                    }
+                })
+                .catch(err => console.error('Stats Error:', err));
+        };
+
+        // Initial Fetch
+        fetchStats();
+
+        // Interval 3s
+        setInterval(fetchStats, 3000);
+    });
+</script>
