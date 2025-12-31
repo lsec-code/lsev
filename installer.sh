@@ -55,6 +55,9 @@ php${PHP_VER}-mbstring php${PHP_VER}-xml php${PHP_VER}-bcmath php${PHP_VER}-curl
 php${PHP_VER}-gd php${PHP_VER}-zip php${PHP_VER}-intl php${PHP_VER}-tokenizer \
 phpmyadmin
 
+# FORCE PHP CLI Version
+update-alternatives --set php /usr/bin/php${PHP_VER}
+
 # Configure PHP Limits (Upload Size, Memory, Time)
 echo -e "${YELLOW}[+] Configuring PHP Limits (512M)...${NC}"
 PHP_INI="/etc/php/${PHP_VER}/fpm/php.ini"
@@ -93,6 +96,7 @@ if [ -d "$target_dir" ]; then
 fi
 
 git clone https://github.com/lsec-code/lsev.git $target_dir
+git config --global --add safe.directory $target_dir
 
 # 5. Database Restore
 echo -e "${YELLOW}[+] Checking for SQL Dump...${NC}"
