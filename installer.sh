@@ -46,9 +46,7 @@ apt install -y software-properties-common git unzip curl zip
 add-apt-repository -y ppa:ondrej/php
 apt update -y
 
-# Install PHP 8.2 (Compatible with most Laravel v10/v11 apps) and Extensions
-# Install PHP 8.3 (Compatible with most Laravel v10/v11 apps) and Extensions
-# Adjust version if needed (user didn't specify, assuming 8.2 or 8.3)
+# Install PHP 8.3 and Extensions
 PHP_VER="8.3"
 apt install -y nginx mariadb-server php${PHP_VER} php${PHP_VER}-fpm php${PHP_VER}-mysql \
 php${PHP_VER}-mbstring php${PHP_VER}-xml php${PHP_VER}-bcmath php${PHP_VER}-curl \
@@ -67,6 +65,8 @@ if [ -f "$PHP_INI" ]; then
     sed -i "s/memory_limit = .*/memory_limit = 512M/" $PHP_INI
     sed -i "s/max_execution_time = .*/max_execution_time = 300/" $PHP_INI
     sed -i "s/max_input_time = .*/max_input_time = 300/" $PHP_INI
+    # RESTART PHP-FPM TO APPLY CHANGES
+    service php${PHP_VER}-fpm restart
 fi
 
 # 3. Database Setup
